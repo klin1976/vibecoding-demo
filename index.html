@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gemini Watermark Tool - 智能浮水印移除</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&family=Outfit:wght@400;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Gemini <span>Watermark Tool</span></h1>
+            <p>使用精確數學演算法，無損還原被浮水印遮擋的像素</p>
+        </header>
+
+        <main>
+            <section id="upload-section" class="card">
+                <div id="drop-zone" class="drop-zone">
+                    <div class="drop-zone-content">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="upload-icon"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg>
+                        <p>拖放圖片至此或點擊上傳</p>
+                        <span>支援 PNG, JPG, WebP</span>
+                    </div>
+                    <input type="file" id="file-input" accept="image/*" hidden multiple>
+                </div>
+            </section>
+
+            <section id="process-section" class="card hidden">
+                <div class="controls">
+                    <div class="control-group">
+                        <label>偵測模式：</label>
+                        <select id="size-mode">
+                            <option value="auto">自動偵測 (建議)</option>
+                            <option value="48">強制小型 (48x48)</option>
+                            <option value="96">強制大型 (96x96)</option>
+                        </select>
+                    </div>
+                    <button id="process-all" class="btn btn-primary">處理所有圖片</button>
+                    <button id="reset-btn" class="btn btn-outline">重新上傳</button>
+                </div>
+
+                <div id="file-list" class="file-grid">
+                    <!-- 圖片清單將在此生成 -->
+                </div>
+            </section>
+
+            <section id="preview-section" class="modal hidden">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h2>圖片預覽</h2>
+                        <button class="close-modal">&times;</button>
+                    </div>
+                    <div id="comparison-container" class="comparison-slider">
+                        <div class="before">
+                            <img id="img-before" src="" alt="Before">
+                            <span class="label">原始圖片</span>
+                        </div>
+                        <div class="after">
+                            <img id="img-after" src="" alt="處理後">
+                            <span class="label">處理完成</span>
+                        </div>
+                        <div class="slider-handle"></div>
+                    </div>
+                    <div class="modal-footer">
+                        <a id="download-btn" class="btn btn-primary" download="processed.png">下載圖片</a>
+                    </div>
+                </div>
+                <div class="modal-overlay"></div>
+            </section>
+        </main>
+
+        <footer>
+            <p>完全於瀏覽器端處理，保障隱私 · 基於 <a href="https://github.com/allenk/GeminiWatermarkTool" target="_blank">GeminiWatermarkTool</a> 演算法</p>
+        </footer>
+    </div>
+
+    <!-- 資源清單會在 JS 中載入 -->
+    <script src="script.js"></script>
+</body>
+</html>
