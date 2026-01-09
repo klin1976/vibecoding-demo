@@ -1,16 +1,66 @@
-# React + Vite
+# Gemini Watermark Remover (Web Version)
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+這是一個基於 Web 的 AI 浮水印去除工具，移植自原本的 C++ 專案。它利用 Canvas API 在瀏覽器端進行高效的影像處理，無需將圖片上傳至伺服器，確保了用戶的隱私與安全。
 
-Currently, two official plugins are available:
+## 🌟 主要功能
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+- **✨ 智慧去浮水印**：自動識別並去除圖片中的特定浮水印圖案。
+- **🖌️ 自訂 Logo 覆蓋**：
+  - 支援上傳自訂 Logo 圖片。
+  - 可調整 Logo **透明度 (Opacity)** 與 **大小 (Size)**。
+  - 即時預覽效果，所見即所得。
+- **🚀 批次處理**：
+  - 支援拖曳上傳 (Drag & Drop)。
+  - 可一次處理多張圖片。
+  - 支援 PNG, JPG, WebP 格式。
+- **💾 靈活的儲存方式**：
+  - **手動儲存模式**：專為受限制的企業環境設計，繞過瀏覽器/IT政策對自動下載的封鎖。
+  - **一鍵複製**：直接將處理後的圖片複製到剪貼簿，方便貼入 Word、Teams 或其他軟體。
+  - **全部下載**：支援批次匯出所有處理後的圖片。
+- **🎨 現代化介面**：
+  - 深色模式 (Dark Theme) 設計。
+  - 響應式佈局 (Grid Layout)。
+  - 直覺的滑桿控制與即時回饋。
 
-## React Compiler
+## 🛠️ 技術架構
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+- **前端框架**：React + Vite
+- **影像處理**：HTML5 Canvas API (純前端運算)
+- **樣式設計**：Vanilla CSS (響應式設計)
+- **特色解決方案**：
+  - **Blob/Data URL 處理**：解決瀏覽器圖片資源管理問題。
+  - **Clipboard API 整合**：突破檔案系統存取限制。
 
-## Expanding the ESLint configuration
+## 📖 使用教學
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+1. **上傳圖片**：直接將圖片拖入視窗，或點擊「新增圖片」按鈕。
+2. **調整設定** (選用)：
+   - **強度調整**：微調去浮水印的力度。
+   - **大小模式**：選擇自動偵測或強制指定浮水印大小。
+3. **添加 Logo** (選用)：
+   - 在上方「自訂 Logo」區塊點擊 **+** 上傳您的 Logo。
+   - 調整透明度和大小滑桿，直到滿意為止。
+4. **輸出圖片**：
+   - **單張下載**：點擊圖片卡片上的「下載」，選擇「另存圖片」或「複製到剪貼簿」。
+   - **全部下載**：點擊右上角的「全部下載」按鈕。
+
+## 💻 安裝與執行
+
+確保您已安裝 [Node.js](https://nodejs.org/)。
+
+```bash
+# 1. 安裝依賴
+npm install
+
+# 2. 啟動開發伺服器
+npm run dev
+```
+
+啟動後，瀏覽器打開 `http://localhost:5173/` 即可使用。
+
+## 🔒 隱私聲明
+
+本應用程式所有影像處理皆在 **您的瀏覽器 (Client-side)** 完成，圖片 **不會** 上傳至任何遠端伺服器，請安心使用。
+
+---
+*Created by Gemini Coding Agent*
