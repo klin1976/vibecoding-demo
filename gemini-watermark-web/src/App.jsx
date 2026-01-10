@@ -2,8 +2,8 @@ import React, { useState, useEffect, useRef, useCallback } from 'react';
 import './styles.css';
 import { WatermarkEngine, WATERMARK_SIZE } from './lib/watermark';
 
-const BG_SMALL_URL = '/bg_48.png';
-const BG_LARGE_URL = '/bg_96.png';
+const BG_SMALL_URL = `${import.meta.env.BASE_URL}bg_48.png`;
+const BG_LARGE_URL = `${import.meta.env.BASE_URL}bg_96.png`;
 
 function App() {
   const [engine, setEngine] = useState(null);
@@ -252,9 +252,62 @@ function App() {
     setSaveModalImg(null);
   };
 
-  // Old download function removed to prevent confusion
-  const downloadImage = (img) => {
-    openSaveModal(img);
+  // NEW: Use File System Access API for direct file saving
+  // This bypasses the browser download manager and IT policy restrictions
+  const downloadImage = async (img) => {
+    const url = img.processedUrl || img.originalUrl;
+    if (!url) {
+      console.error('No URL available for download');
+      return;
+    }
+
+    const baseName = img.name.replace(/\.[^/.]+$/, '');
+    const filename = `processed_${baseName}.png`;
+
+    try {
+      // Check if File System Access API is available (Chrome 86+, Edge 86+)
+      if ('showSaveFilePicker' in window) {
+        // This opens the system's native "Save As" dialog
+        const handle = await window.showSaveFilePicker({
+          suggestedName: filename,
+          types: [{
+            description: 'PNG 圖片',
+            accept: { 'image/png': ['.png'] }
+          }]
+        });
+
+        // Get a writable stream to the file
+        const writable = await handle.createWritable();
+
+        // Convert the image URL to a Blob
+        let blob;
+        if (url.startsWith('data:')) {
+          blob = dataURLtoBlob(url);
+        } else {
+          const response = await fetch(url);
+          blob = await response.blob();
+        }
+
+        // Write the blob to the file and close
+        await writable.write(blob);
+        await writable.close();
+
+        console.log('File saved successfully:', filename);
+      } else {
+        // Fallback for browsers that don't support File System Access API
+        console.log('File System Access API not available, using modal fallback');
+        openSaveModal(img);
+      }
+    } catch (err) {
+      if (err.name === 'AbortError') {
+        // User cancelled the save dialog - this is fine
+        console.log('User cancelled save dialog');
+        return;
+      }
+      console.error('Save failed:', err);
+      // Fallback to manual save modal
+      openSaveModal(img);
+    }
   };
 
   const downloadAll = () => {
