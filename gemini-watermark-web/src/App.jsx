@@ -315,56 +315,58 @@ function App() {
     if (images.length === 0) return;
 
     try {
-      // Use Directory Picker for batch save (one user activation for all files)
-      if ('showDirectoryPicker' in window) {
-        const dirHandle = await window.showDirectoryPicker({
-          mode: 'readwrite',
-          startIn: 'downloads'
-        });
+      // Create ZIP file with all processed images
+      const zip = new JSZip();
 
-        for (const img of images) {
-          const baseName = img.name.replace(/\.[^/.]+$/, '');
-          const filename = `processed_${baseName}.png`;
+      for (const img of images) {
+        const baseName = img.name.replace(/\.[^/.]+$/, '');
+        const filename = `processed_${baseName}.png`;
 
-          try {
-            const fileHandle = await dirHandle.getFileHandle(filename, { create: true });
-            const writable = await fileHandle.createWritable();
-
-            const url = img.processedUrl || img.originalUrl;
-            let blob;
-            if (url.startsWith('data:')) {
-              blob = dataURLtoBlob(url);
-            } else {
-              const response = await fetch(url);
-              blob = await response.blob();
-            }
-
-            await writable.write(blob);
-            await writable.close();
-          } catch (fileErr) {
-            console.error(`Failed to save ${filename}:`, fileErr);
-          }
+        const url = img.processedUrl || img.originalUrl;
+        let blob;
+        if (url.startsWith('data:')) {
+          blob = dataURLtoBlob(url);
+        } else {
+          const response = await fetch(url);
+          blob = await response.blob();
         }
 
-        alert(`已成功儲存 ${images.length} 張圖片！`);
-      } else {
-        // Fallback for browsers that don't support Directory Picker
-        alert('您的瀏覽器不支援資料夾選擇儲存，將嘗試逐一下載。');
-        images.forEach((img, index) => {
-          setTimeout(() => {
-            downloadImage(img);
-          }, index * 1000); // Increased delay
+        zip.file(filename, blob);
+      }
+
+      // Generate the ZIP blob
+      const zipBlob = await zip.generateAsync({ type: 'blob' });
+
+      // Download the ZIP using File System Access API
+      if ('showSaveFilePicker' in window) {
+        const handle = await window.showSaveFilePicker({
+          suggestedName: 'processed_images.zip',
+          types: [{
+            description: 'ZIP 壓縮檔',
+            accept: { 'application/zip': ['.zip'] }
+          }]
         });
+
+        const writable = await handle.createWritable();
+        await writable.write(zipBlob);
+        await writable.close();
+
+        alert(`已成功儲存 ${images.length} 張圖片到 ZIP 檔案！`);
+      } else {
+        // Fallback for browsers without File System Access API
+        const url = URL.createObjectURL(zipBlob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'processed_images.zip';
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
       }
     } catch (err) {
-      if (err.name === 'AbortError') return; // User cancelled
-      console.error('Batch save failed:', err);
-      // Fallback
-      images.forEach((img, index) => {
-        setTimeout(() => {
-          downloadImage(img);
-        }, index * 1000);
-      });
+      if (err.name === 'AbortError') return;
+      console.error('ZIP creation failed:', err);
+      alert('批次下載失敗：' + err.message);
     }
   };
 
