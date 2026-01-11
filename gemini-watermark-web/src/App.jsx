@@ -310,13 +310,61 @@ function App() {
     }
   };
 
-  const downloadAll = () => {
-    images.forEach((img, index) => {
-      // Stagger downloads to avoid browser blocking
-      setTimeout(() => {
-        downloadImage(img);
-      }, index * 500);
-    });
+  const downloadAll = async () => {
+    if (images.length === 0) return;
+
+    try {
+      // Use Directory Picker for batch save (one user activation for all files)
+      if ('showDirectoryPicker' in window) {
+        const dirHandle = await window.showDirectoryPicker({
+          mode: 'readwrite',
+          startIn: 'downloads'
+        });
+
+        for (const img of images) {
+          const baseName = img.name.replace(/\.[^/.]+$/, '');
+          const filename = `processed_${baseName}.png`;
+          
+          try {
+            const fileHandle = await dirHandle.getFileHandle(filename, { create: true });
+            const writable = await fileHandle.createWritable();
+            
+            const url = img.processedUrl || img.originalUrl;
+            let blob;
+            if (url.startsWith('data:')) {
+              blob = dataURLtoBlob(url);
+            } else {
+              const response = await fetch(url);
+              blob = await response.blob();
+            }
+            
+            await writable.write(blob);
+            await writable.close();
+          } catch (fileErr) {
+            console.error(`Failed to save ${filename}:`, fileErr);
+          }
+        }
+        
+        alert(`已成功儲存 ${images.length} 張圖片！`);
+      } else {
+        // Fallback for browsers that don't support Directory Picker
+        alert('您的瀏覽器不支援資料夾選擇儲存，將嘗試逐一下載。');
+        images.forEach((img, index) => {
+          setTimeout(() => {
+            downloadImage(img);
+          }, index * 1000); // Increased delay
+        });
+      }
+    } catch (err) {
+      if (err.name === 'AbortError') return; // User cancelled
+      console.error('Batch save failed:', err);
+      // Fallback
+      images.forEach((img, index) => {
+        setTimeout(() => {
+          downloadImage(img);
+        }, index * 1000);
+      });
+    }
   };
 
   // Preview image in a new window
