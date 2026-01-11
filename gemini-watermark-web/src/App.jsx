@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import './styles.css';
 import { WatermarkEngine, WATERMARK_SIZE } from './lib/watermark';
+import JSZip from 'jszip';
 
 const BG_SMALL_URL = `${import.meta.env.BASE_URL}bg_48.png`;
 const BG_LARGE_URL = `${import.meta.env.BASE_URL}bg_96.png`;
@@ -324,11 +325,11 @@ function App() {
         for (const img of images) {
           const baseName = img.name.replace(/\.[^/.]+$/, '');
           const filename = `processed_${baseName}.png`;
-          
+
           try {
             const fileHandle = await dirHandle.getFileHandle(filename, { create: true });
             const writable = await fileHandle.createWritable();
-            
+
             const url = img.processedUrl || img.originalUrl;
             let blob;
             if (url.startsWith('data:')) {
@@ -337,14 +338,14 @@ function App() {
               const response = await fetch(url);
               blob = await response.blob();
             }
-            
+
             await writable.write(blob);
             await writable.close();
           } catch (fileErr) {
             console.error(`Failed to save ${filename}:`, fileErr);
           }
         }
-        
+
         alert(`已成功儲存 ${images.length} 張圖片！`);
       } else {
         // Fallback for browsers that don't support Directory Picker
